@@ -34,8 +34,13 @@ var camera_x: float = 0.0
 var distance: float = 0.0
 var game_over := false
 var game_started := false
-var start_grace: float = 0.0  ## seconds of input grace after starting
 var high_score: float = 0.0
+
+# Intro cinematic state
+enum IntroPhase { WAITING, TEXT1_IN, TEXT1_HOLD, TEXT1_OUT, TEXT2_IN, TEXT2_HOLD, TEXT2_OUT, RUNNING }
+var intro_phase: int = IntroPhase.WAITING
+var intro_timer: float = 0.0
+var intro_speed_ramp: float = 0.0  ## 0→1 over first few seconds of running
 
 # Player dimensions
 const PW := 24.0
@@ -61,6 +66,7 @@ var score_label: Label
 var gas_label: Label
 var status_label: Label
 var hint_label: Label
+var intro_label: Label
 
 # Colors
 const SKY_TOP := Color("#0a0a1a")
@@ -124,6 +130,17 @@ func _ready():
 	status_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	status_container.add_child(status_label)
 
+	# Cinematic intro label (centered, larger)
+	intro_label = Label.new()
+	intro_label.add_theme_font_size_override("font_size", 48)
+	intro_label.add_theme_color_override("font_color", Color.WHITE)
+	intro_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	intro_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	intro_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	intro_label.modulate.a = 0.0
+	intro_label.text = ""
+	status_container.add_child(intro_label)
+
 	_generate_initial_world()
 	status_label.text = "IBS RUNNER\n\nPress Enter to Start\n\n[Space: Jump  |  Shift: IBS Boost]"
 
@@ -186,25 +203,40 @@ func _process(delta: float):
 	if not game_started:
 		if Input.is_key_pressed(KEY_ENTER):
 			game_started = true
-			start_grace = 0.8  # ignore jump input for 0.8s after start
+			intro_phase = IntroPhase.TEXT1_IN
+			intro_timer = 0.0
+			intro_speed_ramp = 0.0
 			status_label.text = ""
+			score_label.visible = false
+			gas_label.visible = false
+			hint_label.visible = false
 		else:
 			queue_redraw()
 			return
 
-	# ── Start grace period countdown ──
-	if start_grace > 0:
-		start_grace -= delta
+	# ── Intro cinematic sequence ──
+	if intro_phase != IntroPhase.RUNNING:
+		_process_intro(delta)
+		queue_redraw()
+		return
 
-	# ── Speed increases over time ──
-	current_speed = minf(current_speed + speed_increase * delta, max_speed)
+	# ── Speed ramp: start slow, accelerate to full speed over 3 seconds ──
+	if intro_speed_ramp < 1.0:
+		intro_speed_ramp = minf(intro_speed_ramp + delta / 3.0, 1.0)
+		# Ease-in curve for smooth acceleration
+		var ramp: float = intro_speed_ramp * intro_speed_ramp
+		current_speed = run_speed * ramp
+	else:
+		# Normal speed increase over time
+		current_speed = minf(current_speed + speed_increase * delta, max_speed)
+
 	distance += current_speed * delta
 
 	# ── Player auto-run ──
 	player_vel.x = current_speed
 
-	# ── Jump (blocked during start grace period) ──
-	if start_grace <= 0 and (Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up")) and on_ground:
+	# ── Jump ──
+	if (Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up")) and on_ground:
 		player_vel.y = -jump_force
 		on_ground = false
 
@@ -274,6 +306,46 @@ func _process(delta: float):
 		gas_label.add_theme_color_override("font_color", GAS_LOW)
 
 	queue_redraw()
+
+
+func _process_intro(delta: float):
+	intro_timer += delta
+	match intro_phase:
+		IntroPhase.TEXT1_IN:  # "You must escape." fades in
+			intro_label.text = "You must escape."
+			intro_label.modulate.a = minf(intro_timer / 0.8, 1.0)
+			if intro_timer >= 0.8:
+				intro_phase = IntroPhase.TEXT1_HOLD
+				intro_timer = 0.0
+		IntroPhase.TEXT1_HOLD:  # Hold for a beat
+			if intro_timer >= 1.2:
+				intro_phase = IntroPhase.TEXT1_OUT
+				intro_timer = 0.0
+		IntroPhase.TEXT1_OUT:  # Fade out
+			intro_label.modulate.a = maxf(1.0 - intro_timer / 0.6, 0.0)
+			if intro_timer >= 0.6:
+				intro_phase = IntroPhase.TEXT2_IN
+				intro_timer = 0.0
+				intro_label.modulate.a = 0.0
+		IntroPhase.TEXT2_IN:  # "You have IBS." fades in
+			intro_label.text = "You have IBS."
+			intro_label.modulate.a = minf(intro_timer / 0.8, 1.0)
+			if intro_timer >= 0.8:
+				intro_phase = IntroPhase.TEXT2_HOLD
+				intro_timer = 0.0
+		IntroPhase.TEXT2_HOLD:  # Hold
+			if intro_timer >= 1.5:
+				intro_phase = IntroPhase.TEXT2_OUT
+				intro_timer = 0.0
+		IntroPhase.TEXT2_OUT:  # Fade out, then start running
+			intro_label.modulate.a = maxf(1.0 - intro_timer / 0.8, 0.0)
+			if intro_timer >= 1.0:
+				intro_phase = IntroPhase.RUNNING
+				intro_label.modulate.a = 0.0
+				intro_label.text = ""
+				score_label.visible = true
+				gas_label.visible = true
+				hint_label.visible = true
 
 
 func _collide_platform(plat: Dictionary) -> bool:
@@ -374,6 +446,13 @@ func _unhandled_input(event: InputEvent):
 		_generate_initial_world()
 		game_started = false
 		game_over = false
+		intro_phase = IntroPhase.WAITING
+		intro_timer = 0.0
+		intro_label.modulate.a = 0.0
+		intro_label.text = ""
+		score_label.visible = true
+		gas_label.visible = true
+		hint_label.visible = true
 		status_label.text = "IBS RUNNER\n\nPress Enter to Start\n\n[Space: Jump  |  Shift: IBS Boost]"
 
 

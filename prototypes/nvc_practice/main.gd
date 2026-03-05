@@ -74,6 +74,141 @@ const NEED_PATTERNS := [
 	"because my need for",
 ]
 
+# ─── Sentiment Lexicon (AFINN-style, -5 to +5) ───
+# Focused on interpersonal/NVC-relevant language
+var SENTIMENT_LEXICON := {
+	# --- Strong Negative (-5 to -3) ---
+	"hate": -4, "hatred": -4, "despise": -4, "loathe": -4, "detest": -4,
+	"idiot": -5, "stupid": -4, "moron": -5, "pathetic": -4, "worthless": -4,
+	"disgusting": -4, "repulsive": -3, "vile": -4, "toxic": -3, "abusive": -4,
+	"destroy": -3, "ruined": -3, "horrible": -3, "terrible": -3, "awful": -3,
+	"atrocious": -4, "worst": -3, "nightmare": -3, "hell": -3,
+	"furious": -3, "enraged": -3, "livid": -3, "outraged": -3,
+	"betray": -4, "betrayed": -4, "betrayal": -4, "revenge": -4,
+	"threaten": -3, "threat": -3, "punish": -3, "punishment": -3,
+	"manipulate": -3, "manipulative": -3, "exploit": -3,
+	"cruel": -4, "malicious": -4, "vicious": -3, "hostile": -3,
+	"scream": -3, "screaming": -3, "yell": -3, "yelling": -3,
+	"shut up": -4, "get out": -3, "go away": -2,
+	# --- Moderate Negative (-2 to -1) ---
+	"angry": -2, "mad": -2, "frustrated": -2, "annoyed": -2, "irritated": -2,
+	"upset": -2, "disappointed": -2, "hurt": -2, "sad": -2, "unhappy": -2,
+	"worried": -2, "anxious": -2, "stressed": -2, "overwhelmed": -2,
+	"confused": -1, "uncomfortable": -2, "uneasy": -1, "tense": -2,
+	"lonely": -2, "isolated": -2, "exhausted": -2, "drained": -2, "tired": -1,
+	"afraid": -2, "scared": -2, "fearful": -2, "nervous": -1,
+	"resentful": -2, "bitter": -2, "jealous": -2, "envious": -2,
+	"ashamed": -2, "guilty": -2, "embarrassed": -2, "humiliated": -3,
+	"unfair": -2, "unjust": -2, "wrong": -1, "bad": -1, "worse": -2,
+	"fault": -2, "blame": -2, "blamed": -2, "accuse": -2,
+	"demand": -2, "insist": -1, "force": -2, "pressure": -2,
+	"ignore": -2, "ignored": -2, "neglect": -2, "neglected": -2,
+	"reject": -2, "rejected": -2, "abandon": -2, "abandoned": -2,
+	"complain": -1, "complaint": -1, "problem": -1, "issue": -1,
+	"disagree": -1, "conflict": -1, "argue": -2, "argument": -2,
+	"rude": -2, "disrespectful": -2, "inconsiderate": -2, "selfish": -2,
+	"lazy": -2, "careless": -2, "irresponsible": -2, "unreliable": -2,
+	"annoying": -2, "obnoxious": -3, "insufferable": -3,
+	"fail": -2, "failed": -2, "failure": -2, "mess": -1, "messy": -1,
+	"pointless": -2, "useless": -2, "hopeless": -2, "helpless": -2,
+	"never": -1, "can't": -1, "won't": -1, "don't": -1,
+	"unfortunately": -1, "regret": -2, "sorry": -1, "apologies": -1,
+	# --- Mild / Neutral-Leaning (-1 to 0) ---
+	"fine": 0, "okay": 0, "whatever": -1, "guess": -1,
+	"difficult": -1, "hard": -1, "tough": -1, "challenging": -1,
+	"concern": -1, "concerned": -1, "bother": -1, "bothered": -1,
+	# --- Mild Positive (1 to 2) ---
+	"good": 1, "nice": 1, "well": 1, "better": 1, "improve": 1,
+	"like": 1, "enjoy": 2, "pleasant": 2, "glad": 2, "pleased": 2,
+	"comfortable": 1, "calm": 1, "relaxed": 2, "peaceful": 2,
+	"patient": 2, "gentle": 2, "kind": 2, "warm": 1, "friendly": 2,
+	"honest": 1, "sincere": 2, "genuine": 2, "authentic": 2,
+	"fair": 1, "reasonable": 1, "open": 1, "willing": 2,
+	"listen": 1, "hear": 1, "understand": 2, "understood": 2,
+	"consider": 1, "thoughtful": 2, "mindful": 2, "aware": 1,
+	"feel": 1, "feeling": 1, "feelings": 1,  # positive in NVC context
+	"need": 1, "needs": 1,  # positive in NVC context
+	"agree": 1, "accept": 1, "acknowledge": 2, "recognize": 1,
+	"help": 1, "helpful": 2, "support": 2, "supportive": 2,
+	"hope": 1, "hopeful": 2, "optimistic": 2, "possible": 1,
+	"together": 2, "collaborate": 2, "cooperate": 2, "teamwork": 2,
+	"resolve": 1, "solution": 1, "compromise": 1, "balance": 1,
+	"safe": 1, "safety": 1, "secure": 1, "trust": 2, "trusting": 2,
+	"respect": 2, "respectful": 2, "dignity": 2,
+	"share": 1, "sharing": 1, "connect": 2, "connection": 2,
+	# --- Strong Positive (3 to 5) ---
+	"love": 3, "adore": 3, "cherish": 3, "treasure": 3,
+	"grateful": 3, "thankful": 3, "appreciate": 3, "appreciation": 3,
+	"wonderful": 3, "amazing": 3, "beautiful": 3, "excellent": 3,
+	"compassion": 4, "compassionate": 4, "empathy": 4, "empathetic": 4,
+	"forgive": 3, "forgiveness": 3, "mercy": 3, "grace": 3,
+	"inspire": 3, "inspired": 3, "uplift": 3, "encourage": 3,
+	"joyful": 3, "delighted": 3, "thrilled": 3, "overjoyed": 4,
+	"harmony": 3, "unity": 3, "belonging": 3, "community": 2,
+	"courage": 3, "courageous": 3, "brave": 3, "strength": 2,
+	"growth": 2, "learn": 1, "learning": 1, "progress": 2,
+	"heal": 3, "healing": 3, "nurture": 3, "nourish": 3,
+}
+
+# ─── Sentiment Modifiers ───
+const NEGATION_WORDS := [
+	"not", "no", "never", "neither", "nobody", "nothing", "nor",
+	"hardly", "barely", "scarcely", "seldom", "without",
+	"don't", "doesn't", "didn't", "won't", "wouldn't", "couldn't",
+	"shouldn't", "can't", "cannot", "isn't", "aren't", "wasn't", "weren't",
+]
+
+const INTENSIFIERS := {
+	"very": 1.5, "really": 1.5, "extremely": 2.0, "incredibly": 2.0,
+	"so": 1.4, "absolutely": 2.0, "completely": 1.8, "totally": 1.8,
+	"deeply": 1.6, "truly": 1.5, "terribly": 1.8, "awfully": 1.8,
+	"immensely": 2.0, "profoundly": 2.0, "utterly": 2.0,
+}
+
+const DIMINISHERS := {
+	"slightly": 0.5, "somewhat": 0.6, "a bit": 0.5, "a little": 0.5,
+	"kind of": 0.6, "sort of": 0.6, "rather": 0.7, "fairly": 0.7,
+	"marginally": 0.4, "partly": 0.6,
+}
+
+# ─── Communication Style Patterns ───
+const EMPATHY_PATTERNS := [
+	"i understand", "i hear you", "i can see how", "i can imagine",
+	"that must be", "that sounds", "i appreciate", "i respect",
+	"thank you for", "i'm grateful", "i care about", "i value our",
+	"i want to understand", "help me understand", "tell me more",
+	"how are you feeling", "what do you need", "what matters to you",
+	"i acknowledge", "you matter", "your feelings matter",
+	"i want us to", "let's work on this together", "we can figure this out",
+]
+
+const AGGRESSION_PATTERNS := [
+	"or else", "you better", "you'd better", "i'm warning you",
+	"i don't care what you", "deal with it", "too bad",
+	"get over it", "grow up", "stop being", "knock it off",
+	"i'm done with", "i'm sick of", "i've had enough",
+	"that's your problem", "not my problem", "figure it out yourself",
+]
+
+const PASSIVE_AGGRESSIVE_PATTERNS := [
+	"fine, whatever", "if that's what you want", "do whatever you want",
+	"i guess that's fine", "sure, go ahead", "oh, that's nice",
+	"no, it's fine", "don't worry about it", "it doesn't matter",
+	"i'm not mad", "i'm not upset", "forget it", "never mind",
+	"must be nice", "thanks a lot", "oh great", "how wonderful",
+	"i just think it's funny how", "i mean, if you don't care",
+	"but hey, what do i know", "clearly i'm the problem",
+]
+
+const DEFENSIVENESS_PATTERNS := [
+	"it's not my fault", "don't blame me", "i didn't do anything",
+	"what about you", "well you", "yeah but you", "at least i",
+	"i was only", "i was just", "it's not like i", "i can't help it",
+	"that's not what i meant", "you're overreacting", "you're too sensitive",
+	"calm down", "relax", "you're making a big deal",
+]
+
+
 # ─── Scenarios ───
 var scenarios := [
 	{
@@ -521,6 +656,9 @@ func _evaluate(response: String) -> Dictionary:
 			result["judgment_count"] += 1
 			result["blame_examples"].append(pat)
 
+	# Add sentiment analysis
+	result["sentiment"] = _analyze_sentiment(response)
+
 	return result
 
 
@@ -536,6 +674,200 @@ func _word_present(text: String, word: String) -> bool:
 	if end_idx < text.length() and text[end_idx].is_valid_identifier():
 		return false
 	return true
+
+
+# ─── Sentiment Analysis Engine ───
+
+func _analyze_sentiment(response: String) -> Dictionary:
+	var lower := response.to_lower()
+	# Tokenize: split on whitespace and basic punctuation
+	var raw_words := lower.split(" ", false)
+	var words: Array[String] = []
+	for w in raw_words:
+		# Strip punctuation from edges but keep contractions
+		var cleaned := w.strip_edges()
+		while cleaned.length() > 0 and not cleaned[-1].is_valid_identifier() and cleaned[-1] != "'":
+			cleaned = cleaned.left(cleaned.length() - 1)
+		while cleaned.length() > 0 and not cleaned[0].is_valid_identifier():
+			cleaned = cleaned.right(cleaned.length() - 1)
+		if cleaned.length() > 0:
+			words.append(cleaned)
+
+	# Score each word with negation and intensifier handling
+	var word_scores: Array[float] = []
+	var negation_active := false
+	var intensifier_mult := 1.0
+	var positive_words_found: Array[String] = []
+	var negative_words_found: Array[String] = []
+
+	for i in words.size():
+		var word: String = words[i]
+
+		# Check negation
+		if word in NEGATION_WORDS:
+			negation_active = true
+			continue
+
+		# Check intensifiers
+		if word in INTENSIFIERS:
+			intensifier_mult = INTENSIFIERS[word]
+			continue
+
+		# Check diminishers
+		if word in DIMINISHERS:
+			intensifier_mult = DIMINISHERS[word]
+			continue
+
+		# Score the word
+		if word in SENTIMENT_LEXICON:
+			var base_score: float = SENTIMENT_LEXICON[word]
+			var final_score: float = base_score * intensifier_mult
+			if negation_active:
+				final_score *= -0.75  # negation flips but slightly weaker
+			word_scores.append(final_score)
+
+			if final_score > 0.5:
+				positive_words_found.append(word)
+			elif final_score < -0.5:
+				negative_words_found.append(word)
+
+		# Reset modifiers after scoring a word
+		negation_active = false
+		intensifier_mult = 1.0
+
+	# Compute aggregate scores
+	var total_score := 0.0
+	var abs_total := 0.0
+	for s in word_scores:
+		total_score += s
+		abs_total += absf(s)
+
+	var word_count := maxi(words.size(), 1)
+	var scored_count := maxi(word_scores.size(), 1)
+
+	# Normalized sentiment: -1.0 (very negative) to +1.0 (very positive)
+	var normalized: float = clampf(total_score / (scored_count * 2.5), -1.0, 1.0)
+
+	# Emotional intensity: 0.0 (flat) to 1.0 (very charged)
+	var intensity: float = clampf(abs_total / (scored_count * 2.0), 0.0, 1.0)
+
+	# Detect communication styles
+	var style_empathetic := 0
+	var style_aggressive := 0
+	var style_passive_aggressive := 0
+	var style_defensive := 0
+
+	for pat in EMPATHY_PATTERNS:
+		if lower.find(pat) != -1:
+			style_empathetic += 1
+
+	for pat in AGGRESSION_PATTERNS:
+		if lower.find(pat) != -1:
+			style_aggressive += 1
+
+	for pat in PASSIVE_AGGRESSIVE_PATTERNS:
+		if lower.find(pat) != -1:
+			style_passive_aggressive += 1
+
+	for pat in DEFENSIVENESS_PATTERNS:
+		if lower.find(pat) != -1:
+			style_defensive += 1
+
+	# Check for ALL CAPS words (3+ chars, shouting)
+	var caps_count := 0
+	for w in raw_words:
+		if w.length() >= 3 and w == w.to_upper() and w != w.to_lower():
+			caps_count += 1
+
+	# Check for excessive punctuation (!! or ??)
+	var excl_count := response.count("!!")
+	var quest_count := response.count("??")
+
+	# Determine primary communication style
+	var primary_style := "Neutral"
+	var style_scores := {
+		"Empathetic": style_empathetic * 3 + (1 if normalized > 0.2 else 0),
+		"Assertive": (1 if normalized > -0.1 and normalized < 0.5 and intensity < 0.6 else 0) + (1 if style_aggressive == 0 and style_passive_aggressive == 0 else 0),
+		"Aggressive": style_aggressive * 3 + caps_count * 2 + excl_count * 2 + (2 if normalized < -0.4 and intensity > 0.5 else 0),
+		"Passive-Aggressive": style_passive_aggressive * 3 + (1 if style_defensive > 0 else 0),
+		"Defensive": style_defensive * 3,
+	}
+
+	var max_style_score := 0
+	for style_name in style_scores:
+		if style_scores[style_name] > max_style_score:
+			max_style_score = style_scores[style_name]
+			primary_style = style_name
+
+	if max_style_score <= 1:
+		primary_style = "Neutral"
+
+	# "I" vs "You" statement ratio
+	var i_count := 0
+	var you_count := 0
+	for w in words:
+		if w == "i" or w == "i'm" or w == "i've" or w == "i'd" or w == "my":
+			i_count += 1
+		elif w == "you" or w == "you're" or w == "you've" or w == "you'd" or w == "your":
+			you_count += 1
+
+	return {
+		"sentiment_score": normalized,
+		"intensity": intensity,
+		"primary_style": primary_style,
+		"positive_words": positive_words_found,
+		"negative_words": negative_words_found,
+		"i_statements": i_count,
+		"you_statements": you_count,
+		"empathy_count": style_empathetic,
+		"aggression_count": style_aggressive,
+		"passive_aggressive_count": style_passive_aggressive,
+		"defensive_count": style_defensive,
+		"caps_shouting": caps_count,
+		"excessive_punctuation": excl_count + quest_count,
+		"word_count": word_count,
+	}
+
+
+func _sentiment_label(score: float) -> String:
+	if score > 0.4:
+		return "Very Positive"
+	elif score > 0.15:
+		return "Positive"
+	elif score > -0.15:
+		return "Neutral"
+	elif score > -0.4:
+		return "Negative"
+	else:
+		return "Very Negative"
+
+
+func _intensity_label(intensity: float) -> String:
+	if intensity > 0.7:
+		return "Very High"
+	elif intensity > 0.45:
+		return "High"
+	elif intensity > 0.25:
+		return "Moderate"
+	else:
+		return "Calm"
+
+
+func _sentiment_bar(score: float) -> String:
+	# Visual bar from -1 to +1
+	var bar := ""
+	var segments := 10
+	var center := segments / 2
+	var pos := int((score + 1.0) / 2.0 * segments)
+	pos = clampi(pos, 0, segments)
+	for i in range(segments + 1):
+		if i == pos:
+			bar += "◆"
+		elif i == center:
+			bar += "│"
+		else:
+			bar += "─"
+	return "Negative " + bar + " Positive"
 
 
 # ─── Feedback Display ───
@@ -600,20 +932,118 @@ func _show_feedback(r: Dictionary):
 		fb += "End with a specific, actionable request: [i]\"Would you be willing to...?\"[/i]\n"
 		fb += "Requests (not demands) respect the other person's autonomy and invite collaboration.\n\n"
 
-	# Star rating
+	# ── Sentiment & Tone Analysis ──
+	var sent: Dictionary = r["sentiment"]
+	fb += "[b][color=#4ecdc4]── Tone & Sentiment Analysis ──[/color][/b]\n\n"
+
+	# Sentiment score with visual bar
+	var sent_score: float = sent["sentiment_score"]
+	var sent_label := _sentiment_label(sent_score)
+	var sent_color := GREEN if sent_score > 0.15 else (AMBER if sent_score > -0.15 else RED)
+	fb += "[color=#8899aa]%s[/color]\n" % _sentiment_bar(sent_score)
+	fb += "Overall Tone: [color=#%s][b]%s[/b][/color]  " % [sent_color.to_html(false), sent_label]
+	fb += "  |  Emotional Intensity: [b]%s[/b]\n\n" % _intensity_label(sent["intensity"])
+
+	# Communication style
+	var style: String = sent["primary_style"]
+	var style_color := GREEN
+	var style_icon := "💬"
+	var style_tip := ""
+	match style:
+		"Empathetic":
+			style_color = GREEN
+			style_icon = "💚"
+			style_tip = "Your response shows care for the other person's perspective — this is the heart of NVC."
+		"Assertive":
+			style_color = ACCENT
+			style_icon = "✦"
+			style_tip = "Clear and direct while remaining respectful — an ideal NVC communication style."
+		"Aggressive":
+			style_color = RED
+			style_icon = "⚡"
+			style_tip = "This tone may trigger defensiveness. Try softening with feelings and needs language."
+		"Passive-Aggressive":
+			style_color = AMBER
+			style_icon = "🔶"
+			style_tip = "Indirect negativity can erode trust. NVC encourages expressing feelings directly."
+		"Defensive":
+			style_color = AMBER
+			style_icon = "🛡"
+			style_tip = "Defensiveness often blocks connection. Try acknowledging the situation before explaining."
+		"Neutral":
+			style_color = TEXT_DIM
+			style_icon = "○"
+			style_tip = "A measured tone. Consider adding more feeling words to build emotional connection."
+
+	fb += "%s Communication Style: [color=#%s][b]%s[/b][/color]\n" % [style_icon, style_color.to_html(false), style]
+	fb += "[color=#8899aa]%s[/color]\n\n" % style_tip
+
+	# I vs You statements
+	var i_ct: int = sent["i_statements"]
+	var you_ct: int = sent["you_statements"]
+	if i_ct + you_ct > 0:
+		fb += "\"I\" statements: [b]%d[/b]  |  \"You\" statements: [b]%d[/b]  — " % [i_ct, you_ct]
+		if i_ct >= you_ct and i_ct > 0:
+			fb += "[color=#66bb6a]Good balance! \"I\" language takes ownership of your experience.[/color]\n"
+		elif you_ct > i_ct * 2:
+			fb += "[color=#ffb74d]Heavy \"you\" focus. Try reframing with \"I feel...\" and \"I need...\" statements.[/color]\n"
+		else:
+			fb += "[color=#ffb74d]Consider shifting more toward \"I\" statements to own your feelings.[/color]\n"
+		fb += "\n"
+
+	# Detected tone words
+	var pos_words: Array = sent["positive_words"]
+	var neg_words: Array = sent["negative_words"]
+	if pos_words.size() > 0:
+		var unique_pos := []
+		for w in pos_words:
+			if w not in unique_pos and unique_pos.size() < 6:
+				unique_pos.append(w)
+		fb += "[color=#66bb6a]Positive language:[/color] %s\n" % ", ".join(unique_pos)
+	if neg_words.size() > 0:
+		var unique_neg := []
+		for w in neg_words:
+			if w not in unique_neg and unique_neg.size() < 6:
+				unique_neg.append(w)
+		fb += "[color=#ef5350]Charged language:[/color] %s\n" % ", ".join(unique_neg)
+	if pos_words.size() > 0 or neg_words.size() > 0:
+		fb += "\n"
+
+	# Flags for shouting or excessive punctuation
+	if sent["caps_shouting"] > 0:
+		fb += "[color=#ef5350]⚠ ALL CAPS detected (%d words) — this reads as shouting. Lowercase conveys respect.[/color]\n" % sent["caps_shouting"]
+	if sent["excessive_punctuation"] > 0:
+		fb += "[color=#ffb74d]⚠ Excessive punctuation (!!/? ?) can convey aggression or sarcasm. Keep it simple.[/color]\n"
+	if sent["caps_shouting"] > 0 or sent["excessive_punctuation"] > 0:
+		fb += "\n"
+
+	# Empathy bonus
+	if sent["empathy_count"] > 0:
+		fb += "[color=#66bb6a]✓ Empathy language detected — acknowledging the other person builds trust and safety.[/color]\n\n"
+
+	fb += "[b][color=#4ecdc4]── NVC Score ──[/color][/b]\n\n"
+
+	# Star rating (now includes sentiment bonus)
+	# Bonus star for empathetic/assertive style with positive sentiment
+	if style in ["Empathetic", "Assertive"] and sent_score > 0.0:
+		stars += 1
+	var max_possible := 6
+
 	var star_str := ""
-	for i in range(5):
+	for i in range(max_possible):
 		if i < stars:
 			star_str += "★ "
 		else:
 			star_str += "☆ "
 
-	var rating_color := GREEN if stars >= 4 else (AMBER if stars >= 2 else RED)
-	fb += "[b][color=#%s]Score: %s(%d/5)[/color][/b]\n" % [rating_color.to_html(false), star_str, stars]
+	var rating_color := GREEN if stars >= 5 else (AMBER if stars >= 3 else RED)
+	fb += "[b][color=#%s]Score: %s(%d/%d)[/color][/b]\n" % [rating_color.to_html(false), star_str, stars, max_possible]
 
 	# Encouragement
-	if stars == 5:
-		fb += "[color=#66bb6a]Excellent! Your response demonstrates all four NVC components beautifully.[/color]"
+	if stars >= 5:
+		fb += "[color=#66bb6a]Excellent! Your response demonstrates strong NVC skills with empathetic tone.[/color]"
+	elif stars >= 4:
+		fb += "[color=#66bb6a]Great work! You're communicating with both structure and heart.[/color]"
 	elif stars >= 3:
 		fb += "[color=#ffb74d]Good effort! You're on the right track. Review the missing components above.[/color]"
 	elif stars >= 1:
@@ -629,7 +1059,7 @@ func _update_score_display():
 		score_display.text = ""
 		return
 	var total_stars := 0
-	var max_stars := score_history.size() * 5
+	var max_stars := score_history.size() * 6
 	for r in score_history:
 		if not (r["blame_count"] > 0 or r["judgment_count"] > 0):
 			total_stars += 1
@@ -641,6 +1071,12 @@ func _update_score_display():
 			total_stars += 1
 		if r["request"]:
 			total_stars += 1
+		# Sentiment bonus star
+		if r.has("sentiment"):
+			var sent: Dictionary = r["sentiment"]
+			var style: String = sent["primary_style"]
+			if style in ["Empathetic", "Assertive"] and sent["sentiment_score"] > 0.0:
+				total_stars += 1
 	score_display.text = "Total: %d/%d ★" % [total_stars, max_stars]
 
 
@@ -649,7 +1085,6 @@ func _update_score_display():
 func _show_summary():
 	# Replace the whole UI with a summary screen
 	var total := 0
-	var maximum := score_history.size() * 5
 	var component_totals := {"observation": 0, "feeling": 0, "need": 0, "request": 0, "no_blame": 0}
 
 	for r in score_history:
@@ -670,17 +1105,42 @@ func _show_summary():
 	example_btn.visible = false
 
 	var n: int = score_history.size()
-	var pct: int = int(float(total) / float(maximum) * 100.0) if maximum > 0 else 0
+	var max_stars := n * 6
+	var pct: int = int(float(total) / float(max_stars) * 100.0) if max_stars > 0 else 0
 
 	var summary := "[b]Your NVC Journey — %d Scenarios Completed[/b]\n\n" % n
-	summary += "[color=#ffd54f]Overall Score: %d / %d  (%d%%)[/color]\n\n" % [total, maximum, pct]
+	summary += "[color=#ffd54f]Overall Score: %d / %d  (%d%%)[/color]\n\n" % [total, max_stars, pct]
 
 	summary += "[b]Component Breakdown:[/b]\n"
 	summary += "  [color=#ffb74d]Observations:[/color]     %d / %d\n" % [component_totals["observation"], n]
 	summary += "  [color=#ffb74d]Feelings:[/color]         %d / %d\n" % [component_totals["feeling"], n]
 	summary += "  [color=#ffb74d]Needs:[/color]            %d / %d\n" % [component_totals["need"], n]
 	summary += "  [color=#ffb74d]Requests:[/color]         %d / %d\n" % [component_totals["request"], n]
-	summary += "  [color=#ffb74d]No Blame/Judgment:[/color] %d / %d\n\n" % [component_totals["no_blame"], n]
+	summary += "  [color=#ffb74d]No Blame/Judgment:[/color] %d / %d\n" % [component_totals["no_blame"], n]
+
+	# Sentiment summary across all scenarios
+	var avg_sentiment := 0.0
+	var style_counts := {}
+	var total_empathy := 0
+	for r in score_history:
+		if r.has("sentiment"):
+			var s: Dictionary = r["sentiment"]
+			avg_sentiment += s["sentiment_score"]
+			var st: String = s["primary_style"]
+			style_counts[st] = style_counts.get(st, 0) + 1
+			total_empathy += s["empathy_count"]
+			# Bonus star
+			if st in ["Empathetic", "Assertive"] and s["sentiment_score"] > 0.0:
+				total += 1
+	avg_sentiment /= maxf(n, 1)
+
+	summary += "  [color=#ffb74d]Empathetic Tone:[/color]  %d / %d\n\n" % [style_counts.get("Empathetic", 0) + style_counts.get("Assertive", 0), n]
+
+	summary += "[b]Tone Patterns:[/b]\n"
+	summary += "  Average Sentiment: [b]%s[/b] (%.2f)\n" % [_sentiment_label(avg_sentiment), avg_sentiment]
+	for st_name in style_counts:
+		summary += "  %s: %d scenario(s)\n" % [st_name, style_counts[st_name]]
+	summary += "\n"
 
 	# Identify strengths and growth areas
 	var best_score := 0

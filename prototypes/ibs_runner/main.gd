@@ -34,6 +34,7 @@ var camera_x: float = 0.0
 var distance: float = 0.0
 var game_over := false
 var game_started := false
+var start_grace: float = 0.0  ## seconds of input grace after starting
 var high_score: float = 0.0
 
 # Player dimensions
@@ -124,7 +125,7 @@ func _ready():
 	status_container.add_child(status_label)
 
 	_generate_initial_world()
-	status_label.text = "IBS RUNNER\n\nPress Space to Start\n\n[Shift for emergency boost]"
+	status_label.text = "IBS RUNNER\n\nPress Enter to Start\n\n[Space: Jump  |  Shift: IBS Boost]"
 
 
 func _generate_initial_world():
@@ -183,12 +184,17 @@ func _process(delta: float):
 		return
 
 	if not game_started:
-		if Input.is_action_just_pressed("ui_accept"):
+		if Input.is_key_pressed(KEY_ENTER):
 			game_started = true
+			start_grace = 0.8  # ignore jump input for 0.8s after start
 			status_label.text = ""
 		else:
 			queue_redraw()
 			return
+
+	# ── Start grace period countdown ──
+	if start_grace > 0:
+		start_grace -= delta
 
 	# ── Speed increases over time ──
 	current_speed = minf(current_speed + speed_increase * delta, max_speed)
@@ -197,8 +203,8 @@ func _process(delta: float):
 	# ── Player auto-run ──
 	player_vel.x = current_speed
 
-	# ── Jump ──
-	if (Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up")) and on_ground:
+	# ── Jump (blocked during start grace period) ──
+	if start_grace <= 0 and (Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up")) and on_ground:
 		player_vel.y = -jump_force
 		on_ground = false
 
@@ -368,7 +374,7 @@ func _unhandled_input(event: InputEvent):
 		_generate_initial_world()
 		game_started = false
 		game_over = false
-		status_label.text = "IBS RUNNER\n\nPress Space to Start\n\n[Shift for emergency boost]"
+		status_label.text = "IBS RUNNER\n\nPress Enter to Start\n\n[Space: Jump  |  Shift: IBS Boost]"
 
 
 # ═══════════════════════════════════════
